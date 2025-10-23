@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+:root {
+  --text-glow: 0 0 5px #fff, 0 0 10px #ffb3d9, 0 0 20px #ff80c0, 0 0 40px #ff66aa, 0 0 80px #ff3388;
+  --star-glow: 0 0 10px #fff, 0 0 20px #88f;
+}
+
+/* Global Reset and Body Styling */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Prevent scrolling */
+  font-family: 'Dancing Script', cursive;
+  color: #fff;
+  background-color: #000;
+}
+
+/* Main Container - The Cinematic Viewport */
+.main-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* Night Sky Background */
+  background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+  overflow: hidden;
+}
+
+/* Starry Night Effect (using multiple shadows) */
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  animation: star-pulse 60s linear infinite;
+  opacity: 0.8;
+  /* Create hundreds of tiny white/blue/purple stars */
+  box-shadow: 
+    -100vw 30vh 1px 1px #fff, 
+    -50vw 90vh 1px 1px #fff, 
+    20vw 10vh 1px 1px #fff, 
+    70vw 60vh 1px 1px #fff, 
+    -30vw 50vh 1px 1px #fff,
+    /* More stars... */
+    10vw 80vh 1px 1px #d3d3ff, 
+    -80vw 20vh 1px 1px #e0e0ff,
+    30vw -10vh 1px 1px #fff,
+    -90vw -40vh 1px 1px #e0e0ff,
+    45vw 120vh 1px 1px #fff; 
+  /* Add more box-shadow lines for a denser star field */
+}
+
+/* Pulsing Moon/Misty Glow */
+.moon-glow {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  filter: blur(50px);
+  animation: moon-pulse 5s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Keyframe Animations */
+@keyframes star-pulse {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(100vw, 100vh); } /* Parallax movement */
+}
+
+@keyframes moon-pulse {
+  from { opacity: 0.5; transform: scale(1); }
+  to { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Text Styling */
+.cinematic-text {
+  font-size: 5vw; /* Large, cinematic text */
+  text-align: center;
+  text-shadow: var(--text-glow);
+  color: #fff;
+  z-index: 10;
+  transition: opacity 1s ease-in-out;
+  padding: 0 10%;
+  font-weight: 700;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0; /* Initial state handled by the component */
+}
+
+/* Footer Styling */
+.footer-text {
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  font-size: 1.5rem;
+  opacity: 0.6;
+  text-shadow: 0 0 5px #ff80c0;
+  z-index: 10;
+  transition: opacity 2s ease-in;
+}
+
+/* Canvas for 3D Roses */
+.rose-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Below text, above stars */
+}
