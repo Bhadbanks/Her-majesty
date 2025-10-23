@@ -1,14 +1,17 @@
 // src/components/Rose.tsx
 import { useRef } from 'react';
-import { useGLTF } from '@react-three/drei';
+// 💡 FIX 1: Import the correct GLTFResult type directly from @react-three/drei
+import { useGLTF, GLTFResult } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// Define the type for the GLTF loaded object
+// ❌ REMOVED: The manually defined interface is no longer needed:
+/*
 interface GLTFResult {
   nodes: { [key: string]: THREE.Mesh };
   materials: { [key: string]: THREE.Material };
 }
+*/
 
 // Function to generate a random number within a range
 const rand = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -26,7 +29,8 @@ const initialPositions = Array.from({ length: 15 }, () => ({
 export function Rose({ index }: { index: number }) {
   const meshRef = useRef<THREE.Mesh>(null!);
   // Load the 3D model from the public directory
-  const { scene } = useGLTF('/rose.glb') as unknown as GLTFResult;
+  // 💡 FIX 2: Use the imported GLTFResult type, removing 'unknown as'.
+  const { scene } = useGLTF('/rose.glb') as GLTFResult;
 
   const { x, y, z, scale, rotationSpeed, floatSpeed } = initialPositions[index];
 
