@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "vercel-build": "npm install --legacy-peer-deps --force && next build"
   },
   "dependencies": {
     "@react-three/fiber": "^9.0.27",
