@@ -1,0 +1,19 @@
+{
+  "name": "my-queen",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.0",
+    "@react-three/fiber": "^8.0.27",
+    "framer-motion": "^10.12.16",
+    "next": "13.5.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "three": "^0.161.0"
+  }
+}
