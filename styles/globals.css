@@ -1,13 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html, body {
-  padding: 0;
-  margin: 0;
-  font-family: 'Great Vibes', cursive;
-  background: black;
-  overflow: hidden;
-}
+/* Import a suitable Google Font for the modern cursive style */
+@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
 
-.font-cursive {
-  font-family: 'Great Vibes', cursive;
+/* Apply custom glow for the text. Using a radial gradient for a halo effect */
+.text-glowing {
+  /* Using Tailwind's text-shadow utility classes here would be simpler, but custom CSS gives more control */
+  text-shadow: 0 0 7px #fff, 0 0 10px var(--pink-glow), 0 0 21px var(--pink-glow), 0 0 42px var(--pink-glow);
 }
