@@ -1,10 +1,9 @@
-import { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
 import { motion } from "framer-motion";
-import * as THREE from "three";
 
-// Emotional flow lines
+// Lines for apology → romance → seductive tease
 const lines = [
   // 💔 Apology
   "My Queen… I know I’ve faltered sometimes, and I wish I could take back every moment I wasn’t there for you.",
@@ -21,13 +20,13 @@ const lines = [
   "My Queen, you are my everything, my desire, my endless inspiration… and I ache for the moments just with you."
 ];
 
-// Load 3D rose
+// 3D Rose
 function Rose({ position, scale = 0.8 }) {
   const { scene } = useGLTF("/rose.glb");
   return <primitive object={scene} scale={scale} position={position} />;
 }
 
-// Star & Moon Pulse Component
+// Pulse for stars & moon synchronized with text
 function StarMoonPulse({ moonRef, starsRef, currentLine }) {
   useFrame(() => {
     const pulse = 1 + 0.05 * Math.sin(currentLine * 0.5);
@@ -39,20 +38,27 @@ function StarMoonPulse({ moonRef, starsRef, currentLine }) {
 
 export default function Home() {
   const [currentLine, setCurrentLine] = useState(0);
-  const moonRef = React.useRef();
-  const starsRef = React.useRef();
+  const moonRef = useRef();
+  const starsRef = useRef();
+  const audioRef = useRef();
 
+  // Sequential line transitions (~1.5 min total)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentLine(prev => (prev < lines.length - 1 ? prev + 1 : prev));
-    }, 9000); // ~9s per line
+    }, 9000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Set audio volume
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = 0.5;
   }, []);
 
   return (
     <div className="w-screen h-screen bg-black overflow-hidden relative">
-      {/* Audio */}
-      <audio autoPlay loop src="/piano-loop.mp3" className="hidden" />
+      {/* Background music */}
+      <audio ref={audioRef} autoPlay loop src="/her-majesty.mp3" className="hidden" />
 
       {/* 3D Scene */}
       <Canvas className="absolute top-0 left-0 w-full h-full">
@@ -62,7 +68,7 @@ export default function Home() {
         {/* Stars */}
         <Stars ref={starsRef} radius={120} depth={50} count={8000} factor={4} saturation={0} fade />
 
-        {/* Floating Roses */}
+        {/* Floating roses */}
         <Suspense fallback={null}>
           {[...Array(5)].map((_, i) => (
             <motion.mesh
@@ -76,7 +82,7 @@ export default function Home() {
           ))}
         </Suspense>
 
-        {/* Moon */}
+        {/* Misty Moon */}
         <mesh ref={moonRef} position={[5, 7, -20]}>
           <sphereGeometry args={[3, 32, 32]} />
           <meshStandardMaterial color="#fef9e8" emissive="#fff5cc" emissiveIntensity={0.5} roughness={0.5} />
@@ -84,7 +90,7 @@ export default function Home() {
 
         <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
 
-        {/* Pulse */}
+        {/* Pulse synced with text */}
         <StarMoonPulse moonRef={moonRef} starsRef={starsRef} currentLine={currentLine} />
       </Canvas>
 
@@ -115,4 +121,4 @@ export default function Home() {
       </div>
     </div>
   );
-    }
+          }
