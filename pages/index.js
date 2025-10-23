@@ -1,11 +1,10 @@
-// pages/index.js
 import { useEffect, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
 import { motion } from "framer-motion";
 import * as THREE from "three";
 
-// Text lines with full emotional flow
+// Emotional flow lines
 const lines = [
   // 💔 Apology
   "My Queen… I know I’ve faltered sometimes, and I wish I could take back every moment I wasn’t there for you.",
@@ -16,65 +15,37 @@ const lines = [
   "Every smile you share, every quiet moment, every laugh I imagine belongs to you and only you.",
   "No one else could ever light up my world the way you do; every heartbeat whispers your name.",
   "I dream of the day we meet, the moment I can finally hold you close and never let go.",
-  // 🔥 Seductive
+  // 🔥 Seductive tease
   "If only you knew what your presence does to me each night… how every thought of you sets my heart on fire.",
   "I long for the warmth of your touch and the way your voice sends shivers down my spine.",
   "My Queen, you are my everything, my desire, my endless inspiration… and I ache for the moments just with you."
 ];
 
-// Realistic 3D rose
+// Load 3D rose
 function Rose({ position, scale = 0.8 }) {
-  const { scene } = useGLTF("/rose.glb"); // put your rose.glb in public folder
+  const { scene } = useGLTF("/rose.glb");
   return <primitive object={scene} scale={scale} position={position} />;
 }
 
-// Moon with pulse
-function PulsingMoon() {
-  const meshRef = React.useRef();
-  const [pulse, setPulse] = useState(0);
-
+// Star & Moon Pulse Component
+function StarMoonPulse({ moonRef, starsRef, currentLine }) {
   useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.scale.setScalar(3 + Math.sin(pulse) * 0.1);
-      setPulse(pulse + 0.02);
-    }
+    const pulse = 1 + 0.05 * Math.sin(currentLine * 0.5);
+    if (moonRef.current) moonRef.current.scale.set(pulse, pulse, pulse);
+    if (starsRef.current) starsRef.current.material.size = 1 + 0.5 * Math.sin(currentLine * 0.5);
   });
-
-  return (
-    <mesh ref={meshRef} position={[5, 7, -20]}>
-      <sphereGeometry args={[3, 32, 32]} />
-      <meshStandardMaterial
-        color="#fef9e8"
-        emissive="#fff5cc"
-        emissiveIntensity={0.5 + Math.sin(pulse) * 0.2}
-        roughness={0.5}
-      />
-    </mesh>
-  );
-}
-
-// Stars shimmer effect
-function ShimmeringStars() {
-  const starsRef = React.useRef();
-  const [time, setTime] = useState(0);
-
-  useFrame(() => {
-    if (starsRef.current) {
-      starsRef.current.material.opacity = 0.5 + Math.sin(time) * 0.3;
-      setTime(time + 0.01);
-    }
-  });
-
-  return <Stars ref={starsRef} radius={120} depth={50} count={8000} factor={4} saturation={0} fade />;
+  return null;
 }
 
 export default function Home() {
   const [currentLine, setCurrentLine] = useState(0);
+  const moonRef = React.useRef();
+  const starsRef = React.useRef();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentLine((prev) => (prev < lines.length - 1 ? prev + 1 : prev));
-    }, 9000); // ~9s per line for 10 lines (~1.5 min total)
+      setCurrentLine(prev => (prev < lines.length - 1 ? prev + 1 : prev));
+    }, 9000); // ~9s per line
     return () => clearInterval(interval);
   }, []);
 
@@ -88,11 +59,10 @@ export default function Home() {
         <ambientLight intensity={0.7} />
         <pointLight position={[10, 10, 10]} intensity={1.2} />
 
-        {/* Stars and moon with subtle shimmer/pulse */}
-        <ShimmeringStars />
-        <PulsingMoon />
+        {/* Stars */}
+        <Stars ref={starsRef} radius={120} depth={50} count={8000} factor={4} saturation={0} fade />
 
-        {/* Floating 3D roses */}
+        {/* Floating Roses */}
         <Suspense fallback={null}>
           {[...Array(5)].map((_, i) => (
             <motion.mesh
@@ -106,7 +76,16 @@ export default function Home() {
           ))}
         </Suspense>
 
+        {/* Moon */}
+        <mesh ref={moonRef} position={[5, 7, -20]}>
+          <sphereGeometry args={[3, 32, 32]} />
+          <meshStandardMaterial color="#fef9e8" emissive="#fff5cc" emissiveIntensity={0.5} roughness={0.5} />
+        </mesh>
+
         <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
+
+        {/* Pulse */}
+        <StarMoonPulse moonRef={moonRef} starsRef={starsRef} currentLine={currentLine} />
       </Canvas>
 
       {/* Text overlay */}
@@ -118,10 +97,9 @@ export default function Home() {
             animate={{
               opacity: index === currentLine ? 1 : 0,
               y: index === currentLine ? 0 : 40,
-              textShadow:
-                index === currentLine
-                  ? "0px 0px 30px #ff99cc, 0px 0px 40px #ff66aa"
-                  : "0px 0px 20px #ff99cc"
+              textShadow: index === currentLine
+                ? "0px 0px 30px #ff99cc, 0px 0px 40px #ff66aa"
+                : "0px 0px 20px #ff99cc"
             }}
             transition={{ duration: 2 }}
             className="text-3xl md:text-5xl lg:text-6xl font-cursive text-pink-200 my-4 drop-shadow-xl"
