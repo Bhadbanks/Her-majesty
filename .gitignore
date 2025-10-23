@@ -1,0 +1,19 @@
+# .gitignore
+# Next.js
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+*.log
+
+# Environment
+.env
+.local.env
+
+# IDE files (e.g., VS Code)
+.vscode/
+
+#vercel
+.vercel/
