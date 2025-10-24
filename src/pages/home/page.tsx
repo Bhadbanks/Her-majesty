@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { useGLTF, Float } from '@react-three/drei';
-import * as THREE from 'three';
+import { useEffect, useState, useRef, Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { useGLTF, Float } from "@react-three/drei";
+import * as THREE from "three";
 
 const romanticLines = [
   "My Queen 🥺🌹",
@@ -44,11 +44,11 @@ const romanticLines = [
   "I want to be the reason you smile before bed and wake up grinning in the morning ☀️🌙",
   "You’re not just my queen… you’re my craving, my weakness, my desire 🔥",
   "And I’m completely, hopelessly, madly yours — forever and always 🌹✨",
-  "I love you babe🥺🌹"
+  "I love you babe🥺🌹",
 ];
 
 function Rose({ position }: { position: [number, number, number] }) {
-  const { scene } = useGLTF('/rose.glb');
+  const { scene } = useGLTF("/rose.glb");
   const clonedScene = scene.clone();
 
   useEffect(() => {
@@ -82,7 +82,6 @@ function Roses() {
     [-5, 5, -2],
     [6, -4, -3],
   ];
-
   return (
     <>
       {positions.map((pos, i) => (
@@ -138,26 +137,43 @@ export default function HomePage() {
   const [isVisible, setIsVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // 🎵 Handle audio autoplay safely
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.4;
-      audioRef.current.play().catch(() => {
-        document.addEventListener(
-          'click',
-          () => audioRef.current?.play(),
-          { once: true }
-        );
-      });
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.4;
+
+    const tryPlay = () => {
+      audio
+        .play()
+        .then(() => {
+          document.removeEventListener("click", tryPlay);
+          document.removeEventListener("touchstart", tryPlay);
+        })
+        .catch(() => {
+          // Wait for user interaction (mobile autoplay policy)
+        });
+    };
+
+    tryPlay();
+    document.addEventListener("click", tryPlay);
+    document.addEventListener("touchstart", tryPlay);
+
+    return () => {
+      document.removeEventListener("click", tryPlay);
+      document.removeEventListener("touchstart", tryPlay);
+    };
   }, []);
 
+  // 🌹 Cycle romantic lines
   useEffect(() => {
     const showDuration = currentLine === 0 ? 3000 : 4000;
     const hideDuration = 1000;
     const showTimer = setTimeout(() => setIsVisible(false), showDuration);
     const nextTimer = setTimeout(() => {
       if (currentLine < romanticLines.length - 1) {
-        setCurrentLine(currentLine + 1);
+        setCurrentLine((prev) => prev + 1);
         setIsVisible(true);
       }
     }, showDuration + hideDuration);
@@ -204,7 +220,7 @@ export default function HomePage() {
         <div className="w-full max-w-5xl text-center">
           <div
             className={`transition-all duration-1000 transform ${
-              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
           >
             <h1
@@ -212,8 +228,8 @@ export default function HomePage() {
               style={{
                 fontFamily: "'Pacifico', cursive",
                 textShadow:
-                  '0 0 40px rgba(255, 182, 193, 0.8), 0 0 80px rgba(255, 105, 180, 0.6)',
-                lineHeight: '1.3',
+                  "0 0 40px rgba(255, 182, 193, 0.8), 0 0 80px rgba(255, 105, 180, 0.6)",
+                lineHeight: "1.3",
               }}
             >
               {romanticLines[currentLine]}
@@ -227,14 +243,14 @@ export default function HomePage() {
           className="text-2xl text-white/90 drop-shadow-lg"
           style={{
             fontFamily: "'Pacifico', cursive",
-            textShadow: '0 0 20px rgba(255, 182, 193, 0.6)',
+            textShadow: "0 0 20px rgba(255, 182, 193, 0.6)",
           }}
         >
           — With heart ❤️ From Ayomide 🌹💫
         </p>
       </div>
 
-      <audio ref={audioRef} loop>
+      <audio ref={audioRef} loop preload="auto">
         <source src="/her-majesty.mp3" type="audio/mpeg" />
       </audio>
 
@@ -244,4 +260,4 @@ export default function HomePage() {
       />
     </div>
   );
-}
+      }
