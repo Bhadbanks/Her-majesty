@@ -1,19 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-:root{
-  --bg-1: #0a0015;
-  --bg-2: #1a0a2e;
-  --bg-3: #0f0520;
-}
-
-html,body,#root{
-  height:100%;
-  margin:0;
-  background: linear-gradient(180deg,var(--bg-1),var(--bg-2),var(--bg-3));
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  color:white;
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(180deg, #0a0015, #1a0a2e, #0f0520);
+  font-family: 'Pacifico', cursive;
+  color: white;
 }
 
 /* shimmer text */
@@ -28,11 +21,6 @@ html,body,#root{
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-/* small utility */
-.center-cover {
-  position: absolute; inset:0; display:flex; align-items:center; justify-content:center;
 }
 
 .pointer-none { pointer-events: none; }
