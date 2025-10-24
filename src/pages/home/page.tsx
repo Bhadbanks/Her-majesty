@@ -1,9 +1,5 @@
-import { Suspense, useEffect, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect, useState, useRef } from "react";
 
-/* === romantic lines (kept exactly) === */
 const romanticLines = [
   "My Queen 🥺🌹",
   "I know I’ve messed up...",
@@ -48,220 +44,108 @@ const romanticLines = [
   "I love you babe🥺🌹"
 ];
 
-/* ====== Procedural "rose" mesh: stylized using torus + petals ====== */
-function StylizedRose({ position = [0, 0, 0], scale = 1 }: { position?: [number, number, number]; scale?: number }) {
-  const ref = useRef<THREE.Group>(null!);
-
-  // gentle sway animation
-  useFrame((state, delta) => {
-    if (ref.current) {
-      ref.current.rotation.y += 0.1 * delta;
-      ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.05 * scale;
-    }
-  });
-
-  // materials
-  const petalMat = new THREE.MeshStandardMaterial({ color: 0xff4d9e, roughness: 0.4, metalness: 0.1, emissive: 0x220011, emissiveIntensity: 0.06 });
-  const coreMat = new THREE.MeshStandardMaterial({ color: 0xff9acc, roughness: 0.3, metalness: 0.2, emissive: 0x330011, emissiveIntensity: 0.08 });
-
-  return (
-    <group ref={ref} position={position} scale={scale}>
-      {/* core */}
-      <mesh position={[0, 0.05, 0]} castShadow>
-        <sphereGeometry args={[0.18, 20, 20]} />
-        <meshStandardMaterial {...coreMat} />
-      </mesh>
-
-      {/* petals: layered torus-ish */}
-      {[0, 0.5, 1].map((i) => (
-        <mesh key={i} rotation={[Math.PI / 2, i * 0.6, 0]} position={[0, 0.05 - i * 0.02, 0]} castShadow>
-          <torusGeometry args={[0.3 - i * 0.07, 0.12 + i * 0.02, 12, 40]} />
-          <meshStandardMaterial {...petalMat} />
-        </mesh>
-      ))}
-
-      {/* little stem */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.45, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.6, 8]} />
-        <meshStandardMaterial color={0x186a3b} />
-      </mesh>
-    </group>
-  );
-}
-
-/* ====== Many roses arranged in the scene ====== */
-function RosesField() {
-  const positions: [number, number, number][] = [
-    [-3.5, -1.3, -2],
-    [2.7, -0.8, -3],
-    [4.5, 0.5, -4],
-    [-5, 0.8, -3.5],
-    [1.2, 2.3, -5],
-    [-1.7, 1.5, -3],
-    [3.8, -2.1, -2.5]
-  ];
-
-  return (
-    <>
-      {positions.map((p, i) => (
-        <Float key={i} speed={1 + i * 0.12} rotationIntensity={0.6} floatIntensity={1.2}>
-          <StylizedRose position={p} scale={0.9 + (i % 3) * 0.25} />
-        </Float>
-      ))}
-    </>
-  );
-}
-
-/* ====== Stars particle field (points) ====== */
-function StarsField() {
-  const ref = useRef<THREE.Points>(null);
-
-  useFrame(() => {
-    if (ref.current) {
-      const mat = ref.current.material as THREE.PointsMaterial;
-      mat.size = 0.09 + Math.sin(Date.now() * 0.002) * 0.03;
-    }
-  });
-
-  const count = 400;
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    pos[i * 3] = (Math.random() - 0.5) * 40;
-    pos[i * 3 + 1] = (Math.random() - 0.8) * 30 + 2;
-    pos[i * 3 + 2] = (Math.random() - 0.5) * 50 - 10;
-  }
-
-  return (
-    <points ref={ref} position={[0, 0, -5]}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" array={pos} count={count} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={0.09} color={"#ffffff"} transparent opacity={0.9} />
-    </points>
-  );
-}
-
-/* ====== Mild fog/atmosphere and soft lights are set in the Canvas parent ====== */
-
 export default function HomePage() {
   const [currentLine, setCurrentLine] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  /* audio autoplay with fallback to user interaction */
+  // audio autoplay
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = 0.38;
-
-    const tryPlay = () => {
-      audio.play().catch(() => {
-        /* will wait for a real interaction */
-      });
+    audio.volume = 0.4;
+    const attemptPlay = () => {
+      audio.play().catch(() => {});
     };
-
-    tryPlay();
-    document.addEventListener("click", tryPlay);
-    document.addEventListener("touchstart", tryPlay);
-
-    return () => {
-      document.removeEventListener("click", tryPlay);
-      document.removeEventListener("touchstart", tryPlay);
-    };
+    attemptPlay();
+    document.addEventListener("click", attemptPlay, { once: true });
+    document.addEventListener("touchstart", attemptPlay, { once: true });
   }, []);
 
-  /* lines cycle */
+  // text transition
   useEffect(() => {
-    const showDuration = currentLine === 0 ? 3000 : 4200;
-    const hideDuration = 900;
-    const t1 = setTimeout(() => setIsVisible(false), showDuration);
-    const t2 = setTimeout(() => {
-      if (currentLine < romanticLines.length - 1) {
-        setCurrentLine((s) => s + 1);
-        setIsVisible(true);
-      } else {
-        // optionally loop:
-        // setCurrentLine(0);
-        // setIsVisible(true);
-      }
-    }, showDuration + hideDuration);
+    const showTime = 3000;
+    const hideTime = 1000;
+    const showTimer = setTimeout(() => setVisible(false), showTime);
+    const nextTimer = setTimeout(() => {
+      setCurrentLine((i) => (i + 1) % romanticLines.length);
+      setVisible(true);
+    }, showTime + hideTime);
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+      clearTimeout(showTimer);
+      clearTimeout(nextTimer);
     };
   }, [currentLine]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100vh", position: "relative", overflow: "hidden" }}>
-      {/* 3D canvas */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-        <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
-          <fog attach="fog" args={["#0f0520", 2, 18]} />
-          <ambientLight intensity={0.25} />
-          <directionalLight position={[5, 10, 5]} intensity={0.6} />
-          <pointLight position={[-6, -4, 4]} color={"#ff9acc"} intensity={0.25} />
-          <StarsField />
-          <Suspense fallback={null}>
-            <RosesField />
-          </Suspense>
-          {/* Nice camera controls for desktop (no pan) */}
-          <OrbitControls enablePan={false} enableZoom={false} enableRotate={true} autoRotate={false} />
-        </Canvas>
-      </div>
-
-      {/* subtle particle shimmer overlay (DOM) */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none" }}>
-        {[...Array(28)].map((_, i) => (
+    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-[#0a0015] via-[#1a0a2e] to-[#0f0520]">
+      {/* stars */}
+      <div className="absolute inset-0 z-0 pointer-none">
+        {[...Array(50)].map((_, i) => (
           <div
             key={i}
+            className="absolute bg-white rounded-full animate-pulse"
             style={{
-              position: "absolute",
-              left: `${Math.random() * 100}%`,
+              width: Math.random() * 3 + 1 + "px",
+              height: Math.random() * 3 + 1 + "px",
               top: `${Math.random() * 100}%`,
-              width: Math.random() * 6 + 2,
-              height: Math.random() * 6 + 2,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)",
-              filter: "blur(6px)",
-              transform: `translate(-50%, -50%)`,
-              animation: `float ${2 + Math.random() * 4}s ease-in-out ${Math.random() * 3}s infinite`,
-              opacity: 0.6
+              left: `${Math.random() * 100}%`,
+              opacity: 0.5 + Math.random() * 0.5,
+              animationDuration: `${2 + Math.random() * 3}s`,
+              animationDelay: `${Math.random() * 2}s`,
             }}
           />
         ))}
       </div>
 
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0) translateX(0) scale(1); opacity:0.6; }
-          50% { transform: translateY(-20px) translateX(6px) scale(1.1); opacity:1; }
-          100% { transform: translateY(0) translateX(0) scale(1); opacity:0.6; }
-        }
-      `}</style>
-
-      {/* center text */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-        <div style={{ width: "100%", maxWidth: 1100, textAlign: "center", pointerEvents: "auto" }}>
-          <div style={{ transition: "all 1000ms", transform: isVisible ? "scale(1)" : "scale(.96)", opacity: isVisible ? 1 : 0 }}>
-            <h1 className="shimmer" style={{ fontFamily: "'Pacifico', cursive", fontSize: "3.6rem", lineHeight: 1.05, margin: 0, textShadow: "0 0 40px rgba(255,182,193,0.8)" }}>
-              {romanticLines[currentLine]}
-            </h1>
+      {/* floating roses */}
+      <div className="absolute inset-0 z-5 pointer-none">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-4xl text-pink-300 opacity-70 animate-bounce"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              filter: "drop-shadow(0 0 10px pink)",
+              animationDelay: `${Math.random() * 3}s`,
+            }}
+          >
+            🌹
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* footer credit */}
-      <div style={{ position: "absolute", bottom: 24, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
-        <p style={{ margin: 0, fontFamily: "'Pacifico', cursive", fontSize: 18, color: "rgba(255,255,255,0.92)", textShadow: "0 0 12px rgba(0,0,0,0.5)" }}>
+      {/* romantic line */}
+      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-none">
+        <h1
+          className={`text-center px-6 text-4xl md:text-6xl font-bold bg-clip-text text-transparent transition-all duration-1000 ${
+            visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #fff, #ffc0cb, #ff69b4)",
+            textShadow:
+              "0 0 40px rgba(255,182,193,0.8), 0 0 80px rgba(255,105,180,0.6)",
+            fontFamily: "'Pacifico', cursive",
+            lineHeight: 1.1,
+          }}
+        >
+          {romanticLines[currentLine]}
+        </h1>
+      </div>
+
+      {/* footer */}
+      <div className="absolute bottom-8 w-full text-center z-20 pointer-none">
+        <p style={{ fontFamily: "'Pacifico', cursive", fontSize: "1.2rem", color: "rgba(255,255,255,0.9)" }}>
           — With heart ❤️ From Ayomide 🌹💫
         </p>
       </div>
 
-      {/* audio element (must be in public/her-majesty.mp3) */}
+      {/* music */}
       <audio ref={audioRef} loop preload="auto">
         <source src="/her-majesty.mp3" type="audio/mpeg" />
       </audio>
     </div>
   );
-        }
+            }
