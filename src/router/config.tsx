@@ -24,7 +24,7 @@ const routes: RouteObject[] = [
       >
         <h1 style={{ fontSize: "3rem" }}>404 — Page Not Found 💔</h1>
         <p style={{ marginTop: "1rem", fontSize: "1.5rem" }}>
-          Bby... this page doesn’t exist🥺🌹
+          Bby... this page doesn’t exist 🤕🌹
         </p>
       </div>
     ),
