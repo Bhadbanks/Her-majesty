@@ -1,34 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+:root{
+  --bg-1: #0a0015;
+  --bg-2: #1a0a2e;
+  --bg-3: #0f0520;
 }
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+html,body,#root{
+  height:100%;
+  margin:0;
+  background: linear-gradient(180deg,var(--bg-1),var(--bg-2),var(--bg-3));
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  color:white;
 }
-#root {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+
+/* shimmer text */
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.12) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
 }
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
+
+/* small utility */
+.center-cover {
+  position: absolute; inset:0; display:flex; align-items:center; justify-content:center;
 }
+
+.pointer-none { pointer-events: none; }
