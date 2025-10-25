@@ -1,176 +1,275 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const romanticLines = [
-  "To Kofoworola 🌹 & Oyindamola 🤍✨️",
-  "Two souls who make the night feel softer...",
-  "You both bring light even to the darkest skies 💫",
-  "Your laughter — it’s a melody I never want to forget 🎵",
-  "Your kindness and warmth inspire everything around you",
-  "The way you both glow… it’s impossible not to notice 🌌",
-  "Some people just have that magic — and you’re both made of it ✨",
-  "If the stars could talk, they’d speak your names",
-  "Thank you for being my peace, my joy, my friends 🫶",
-  "The world’s a lot more beautiful with you two in it 🌹🤍",
-  "Never stop shining, never stop smiling",
-  "And if you ever forget how special you are —",
-  "Look at the stars… they’ll remind you 🌠",
-  "You’re loved more than you know 💞",
-  "Always — King Lowkey ⚡️🌹"
+/**
+ * For Kofoworola 🌹 & Oyindamola 🤍✨️
+ * From King Lowkey ⚡️
+ */
+
+const LINES = [
+  "Under the calm sky, the night remembers your laughter 🌙",
+  "Kofoworola 🌹 and Oyindamola 🤍 — my favorite constellation ✨",
+  "You both glow differently, yet together you light up everything 💫",
+  "Kofoworola — your warmth feels like sunrise after a long storm ☀️",
+  "Oyindamola — your calm is the rhythm every heart needs 🎶",
+  "You’re the balance of fire and peace, energy and grace ⚖️",
+  "Every smile, every look — tiny galaxies forming between us 🌌",
+  "You’ve made the ordinary feel like poetry 🥺",
+  "Even silence with you two hums like music ❤️",
+  "I still replay your laughter when the night feels too long 🎧",
+  "Because somehow, you turned friendship into art 🎨",
+  "You remind me that real bonds don’t fade, they just glow slower 🌠",
+  "Tonight, even the moon looks jealous — it’s not the only light out here 😌",
+  "If the stars could whisper, they’d say your names softly 💞",
+  "Kofoworola 🌹 and Oyindamola 🤍 — rare souls, timeless hearts 🕊️",
+  "May your dreams always meet where peace lives ✨",
+  "And may this night carry a piece of my gratitude 🌙",
+  "For your laughter, your patience, your hearts 💫",
+  "You’re both beautiful stories written in starlight 💕",
+  "— King Lowkey ⚡️"
 ];
 
+function createStars(n: number) {
+  const stars = [];
+  for (let i = 0; i < n; i++) {
+    const size = Math.random() * 2.6 + 0.6;
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const delay = Math.random() * 3;
+    const duration = 2 + Math.random() * 3;
+    stars.push({ id: i, size, left, top, delay, duration });
+  }
+  return stars;
+}
+
+function createHearts(n: number) {
+  const hearts = [];
+  for (let i = 0; i < n; i++) {
+    const left = Math.random() * 100;
+    const top = 60 + Math.random() * 40;
+    const delay = Math.random() * 3;
+    const duration = 6 + Math.random() * 6;
+    const scale = 0.9 + Math.random() * 0.9;
+    hearts.push({ id: i, left, top, delay, duration, scale });
+  }
+  return hearts;
+}
+
 export default function Home() {
-  const [currentLine, setCurrentLine] = useState(0);
+  const stars = createStars(60);
+  const hearts = createHearts(10);
+  const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 🔊 Auto play (safe for mobile)
+  // autoplay music
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = 0.5;
-    const playAudio = () => {
-      audio.play().catch(() => {});
-      document.removeEventListener("click", playAudio);
-      document.removeEventListener("touchstart", playAudio);
+    const playAudio = async () => {
+      try {
+        await audioRef.current?.play();
+      } catch {
+        const resume = async () => {
+          try {
+            await audioRef.current?.play();
+          } catch {}
+          document.removeEventListener("click", resume);
+          document.removeEventListener("touchstart", resume);
+        };
+        document.addEventListener("click", resume);
+        document.addEventListener("touchstart", resume);
+      }
     };
-    document.addEventListener("click", playAudio);
-    document.addEventListener("touchstart", playAudio);
-    audio.play().catch(() => {});
+    playAudio();
   }, []);
 
-  // ⏳ Text transitions
+  // text cycling
   useEffect(() => {
-    const showDuration = 7000;
-    const hideDuration = 1000;
-    const showTimer = setTimeout(() => setVisible(false), showDuration);
+    const showDuration = 4500;
+    const hideTimer = setTimeout(() => setVisible(false), showDuration);
     const nextTimer = setTimeout(() => {
-      if (currentLine < romanticLines.length - 1) {
-        setCurrentLine((c) => c + 1);
-        setVisible(true);
-      }
-    }, showDuration + hideDuration);
+      setIndex((i) => Math.min(i + 1, LINES.length - 1));
+      setVisible(true);
+    }, showDuration + 1000);
     return () => {
-      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
       clearTimeout(nextTimer);
     };
-  }, [currentLine]);
+  }, [index]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-[#070011] via-[#120625] to-[#000010]">
-      {/* 🌙 Glowing moon */}
-      <div className="absolute top-10 right-16 z-10">
-        <div className="w-28 h-28 bg-gradient-to-br from-yellow-100 to-yellow-400 rounded-full shadow-[0_0_60px_20px_rgba(255,255,150,0.4)] animate-moon" />
-      </div>
+    <div className="app">
+      {/* background gradient */}
+      <div className="bg"></div>
 
-      {/* 🌟 Background stars */}
-      <div className="absolute inset-0 overflow-hidden z-0">
-        {[...Array(80)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full opacity-70 animate-pulse"
-            style={{
-              width: `${Math.random() * 3}px`,
-              height: `${Math.random() * 3}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
-            }}
-          />
-        ))}
-      </div>
+      {/* moon */}
+      <div className="moon"></div>
 
-      {/* ❤️ Floating hearts */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-pink-300 text-lg animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              bottom: `-${Math.random() * 20}px`,
-              animationDelay: `${Math.random() * 6}s`,
-              animationDuration: `${6 + Math.random() * 6}s`
-            }}
-          >
-            ❤️
-          </div>
-        ))}
-      </div>
+      {/* stars */}
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="star"
+          style={{
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            left: `${s.left}%`,
+            top: `${s.top}%`,
+            animationDelay: `${s.delay}s`,
+            animationDuration: `${s.duration}s`,
+          }}
+        />
+      ))}
 
-      {/* ✨ Shimmer overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-transparent animate-shimmer z-10" />
+      {/* hearts */}
+      {hearts.map((h) => (
+        <div
+          key={h.id}
+          className="heart"
+          style={{
+            left: `${h.left}%`,
+            top: `${h.top}%`,
+            animationDelay: `${h.delay}s`,
+            animationDuration: `${h.duration}s`,
+            transform: `scale(${h.scale})`,
+          }}
+        >
+          ❤️
+        </div>
+      ))}
 
-      {/* 💬 Main text */}
-      <div className="relative z-20 flex items-center justify-center w-full h-full px-8">
-        <div className="w-full max-w-4xl text-center">
-          <h1
-            className={`transition-all duration-1000 transform ${
-              visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-            } text-4xl md:text-6xl font-bold bg-gradient-to-r from-rose-300 via-pink-200 to-white bg-clip-text text-transparent animate-softfloat`}
-            style={{
-              fontFamily: "'Pacifico', cursive",
-              textShadow:
-                "0 0 40px rgba(255, 182, 193, 0.8), 0 0 80px rgba(255, 105, 180, 0.6)",
-              lineHeight: "1.4"
-            }}
-          >
-            {romanticLines[currentLine]}
-          </h1>
+      {/* text */}
+      <div className="center">
+        <div className="card">
+          <h1 className="title">Kofoworola 🌹 &amp; Oyindamola 🤍✨️</h1>
+          <p className={`line ${visible ? "visible" : "hidden"}`}>
+            {LINES[index]}
+          </p>
+          <div className="signature">— King Lowkey ⚡️</div>
         </div>
       </div>
 
-      {/* 🖋 Signature */}
-      <div className="absolute bottom-8 left-0 right-0 z-30 text-center">
-        <p
-          className="text-2xl text-white/90 drop-shadow-lg"
-          style={{
-            fontFamily: "'Pacifico', cursive",
-            textShadow: "0 0 20px rgba(255, 182, 193, 0.6)"
-          }}
-        >
-          — With heart ❤️ From King Lowkey ⚡️🌹
-        </p>
-      </div>
+      {/* your music */}
+      <audio ref={audioRef} src="/her-majesty.mp3" loop preload="auto" />
 
-      {/* 🎵 Music */}
-      <audio ref={audioRef} src="/her-majesty.mp3" loop></audio>
+      <style>{`
+        .app {
+          position: relative;
+          width: 100%;
+          height: 100vh;
+          overflow: hidden;
+          background: radial-gradient(ellipse at bottom, #0d0221 0%, #000 100%);
+          color: white;
+          font-family: 'Poppins', sans-serif;
+        }
 
-      {/* 🌸 Font */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
-        rel="stylesheet"
-      />
+        .bg {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, #0a0018, #120028);
+          animation: skyGlow 8s ease-in-out infinite alternate;
+          z-index: 0;
+        }
+
+        @keyframes skyGlow {
+          from { filter: brightness(0.9); }
+          to { filter: brightness(1.2); }
+        }
+
+        .moon {
+          position: absolute;
+          top: 10%;
+          right: 20%;
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #fff9e6 20%, #f0e0b0 60%, transparent 80%);
+          box-shadow: 0 0 40px 15px rgba(255, 250, 200, 0.5);
+          animation: moonFloat 12s ease-in-out infinite alternate;
+          z-index: 1;
+        }
+
+        @keyframes moonFloat {
+          from { transform: translateY(0px); opacity: 0.9; }
+          to { transform: translateY(20px); opacity: 1; }
+        }
+
+        .star {
+          position: absolute;
+          background: white;
+          border-radius: 50%;
+          opacity: 0.7;
+          animation: twinkle ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+          from { opacity: 0.2; }
+          to { opacity: 1; }
+        }
+
+        .heart {
+          position: absolute;
+          font-size: 16px;
+          animation: floatUp linear infinite;
+          opacity: 0.8;
+        }
+
+        @keyframes floatUp {
+          from { transform: translateY(0) scale(1); opacity: 0.8; }
+          to { transform: translateY(-100vh) scale(1.3); opacity: 0; }
+        }
+
+        .center {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          z-index: 5;
+          padding: 0 16px;
+        }
+
+        .card {
+          max-width: 700px;
+          background: rgba(255,255,255,0.05);
+          padding: 24px;
+          border-radius: 20px;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 0 40px rgba(255,255,255,0.1);
+        }
+
+        .title {
+          font-size: 1.6rem;
+          font-weight: 600;
+          color: #ffd6ff;
+          text-shadow: 0 0 15px #ff7ce5;
+        }
+
+        .line {
+          font-size: 1.25rem;
+          transition: all 1s ease;
+          opacity: 0;
+          margin-top: 18px;
+          line-height: 1.5;
+        }
+
+        .line.visible {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .line.hidden {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+
+        .signature {
+          margin-top: 24px;
+          font-style: italic;
+          font-weight: 500;
+          color: #ffe6f0;
+        }
+      `}</style>
     </div>
   );
-}
-
-/* 🌌 Custom Animations */
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes float {
-  0% { transform: translateY(0) scale(1); opacity: 0.9; }
-  50% { transform: translateY(-60vh) scale(1.2); opacity: 1; }
-  100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
-}
-.animate-float { animation: float linear infinite; }
-
-@keyframes shimmer {
-  0%,100% { opacity: 0.05; }
-  50% { opacity: 0.15; }
-}
-.animate-shimmer { animation: shimmer 3s ease-in-out infinite; }
-
-@keyframes softfloat {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-6px) scale(1.02); }
-}
-.animate-softfloat { animation: softfloat 4s ease-in-out infinite; }
-
-@keyframes moonmove {
-  0%, 100% { transform: translateY(0px); filter: brightness(1); }
-  50% { transform: translateY(8px); filter: brightness(1.2); }
-}
-.animate-moon { animation: moonmove 6s ease-in-out infinite; }
-`;
-document.head.appendChild(style);
+            }
