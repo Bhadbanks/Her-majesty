@@ -3,28 +3,34 @@ import { useEffect, useRef, useState } from "react";
 /**
  * For Kofoworola 🌹 & Oyindamola 🤍✨️
  * From King Lowkey ⚡️
+ * Cinematic Night Edition ✨
  */
 
 const LINES = [
-  "Under the calm sky, the night remembers your laughter 🌙",
-  "Kofoworola 🌹 and Oyindamola 🤍 — my favorite constellation ✨",
-  "You both glow differently, yet together you light up everything 💫",
-  "Kofoworola — your warmth feels like sunrise after a long storm ☀️",
-  "Oyindamola — your calm is the rhythm every heart needs 🎶",
-  "You’re the balance of fire and peace, energy and grace ⚖️",
-  "Every smile, every look — tiny galaxies forming between us 🌌",
-  "You’ve made the ordinary feel like poetry 🥺",
-  "Even silence with you two hums like music ❤️",
-  "I still replay your laughter when the night feels too long 🎧",
-  "Because somehow, you turned friendship into art 🎨",
-  "You remind me that real bonds don’t fade, they just glow slower 🌠",
-  "Tonight, even the moon looks jealous — it’s not the only light out here 😌",
-  "If the stars could whisper, they’d say your names softly 💞",
-  "Kofoworola 🌹 and Oyindamola 🤍 — rare souls, timeless hearts 🕊️",
-  "May your dreams always meet where peace lives ✨",
-  "And may this night carry a piece of my gratitude 🌙",
-  "For your laughter, your patience, your hearts 💫",
-  "You’re both beautiful stories written in starlight 💕",
+  "Hey you two… 🌙",
+  "Kofoworola 🌹 & Oyindamola 🤍✨️",
+  "My favorite duo since chaos found its rhythm 😌",
+  "You both have this magic — loud enough to fill silence, soft enough to calm storms 💫",
+  "Kofoworola… short queen with the legendary forehead 😅👑",
+  "That forehead’s got more shine than the moon itself 🌝",
+  "You walk in with attitude — but your laughter always betrays you 😄",
+  "And behind that sass is a heart that forgives too easily, loves too deeply 💞",
+  "Church girl, but still the reason trouble looks fun 😇🔥",
+  "Oyindamola 🤍 — your calmness is golden, but don’t push her buttons 😌",
+  "Caring, thoughtful, hardworking… like she’s got a heart that doesn’t rest 💪",
+  "You see the good in everyone — but you’ll fight for what’s right too ⚔️",
+  "You’ve both been friends since forever — laughter, tears, secrets, all woven tight 🪶",
+  "The kind of friendship that time only polishes, never fades ✨",
+  "Every talk, every joke, every moment — I see light in it 🌌",
+  "You both remind me that kindness can be loud, and love can be playful 💛",
+  "Sometimes I just stop and think — how lucky am I to know you two? 😔❤️",
+  "Because when I say I appreciate you, I mean it — from the deepest part 💫",
+  "You’re both stars — and even the sky feels jealous tonight 🌠",
+  "So if this moment feels warm, it’s just my gratitude finding its way to you 💭",
+  "Keep being sunshine and spark — both of you 🌞✨",
+  "This world’s too cold for your kind of warmth, don’t ever dim 🔥",
+  "To my forever favorites — with love, laughter, and a smile I can’t hide 😌",
+  "With all respect and chaos,",
   "— King Lowkey ⚡️"
 ];
 
@@ -61,7 +67,7 @@ export default function Home() {
   const [visible, setVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // autoplay music
+  // autoplay your music
   useEffect(() => {
     const playAudio = async () => {
       try {
@@ -81,9 +87,9 @@ export default function Home() {
     playAudio();
   }, []);
 
-  // text cycling
+  // cinematic fade + slide transitions
   useEffect(() => {
-    const showDuration = 4500;
+    const showDuration = 5500;
     const hideTimer = setTimeout(() => setVisible(false), showDuration);
     const nextTimer = setTimeout(() => {
       setIndex((i) => Math.min(i + 1, LINES.length - 1));
@@ -97,13 +103,9 @@ export default function Home() {
 
   return (
     <div className="app">
-      {/* background gradient */}
-      <div className="bg"></div>
+      <div className="bg" />
+      <div className="moon" />
 
-      {/* moon */}
-      <div className="moon"></div>
-
-      {/* stars */}
       {stars.map((s) => (
         <div
           key={s.id}
@@ -114,12 +116,11 @@ export default function Home() {
             left: `${s.left}%`,
             top: `${s.top}%`,
             animationDelay: `${s.delay}s`,
-            animationDuration: `${s.duration}s`,
+            animationDuration: `${s.duration}s`
           }}
         />
       ))}
 
-      {/* hearts */}
       {hearts.map((h) => (
         <div
           key={h.id}
@@ -129,14 +130,13 @@ export default function Home() {
             top: `${h.top}%`,
             animationDelay: `${h.delay}s`,
             animationDuration: `${h.duration}s`,
-            transform: `scale(${h.scale})`,
+            transform: `scale(${h.scale})`
           }}
         >
           ❤️
         </div>
       ))}
 
-      {/* text */}
       <div className="center">
         <div className="card">
           <h1 className="title">Kofoworola 🌹 &amp; Oyindamola 🤍✨️</h1>
@@ -147,7 +147,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* your music */}
       <audio ref={audioRef} src="/her-majesty.mp3" loop preload="auto" />
 
       <style>{`
@@ -164,7 +163,7 @@ export default function Home() {
         .bg {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, #0a0018, #120028);
+          background: linear-gradient(to top, #080011, #140030);
           animation: skyGlow 8s ease-in-out infinite alternate;
           z-index: 0;
         }
@@ -176,20 +175,20 @@ export default function Home() {
 
         .moon {
           position: absolute;
-          top: 10%;
+          top: 12%;
           right: 20%;
-          width: 90px;
-          height: 90px;
+          width: 110px;
+          height: 110px;
           border-radius: 50%;
-          background: radial-gradient(circle, #fff9e6 20%, #f0e0b0 60%, transparent 80%);
-          box-shadow: 0 0 40px 15px rgba(255, 250, 200, 0.5);
-          animation: moonFloat 12s ease-in-out infinite alternate;
+          background: radial-gradient(circle, #fff8d8 25%, #e6c888 60%, transparent 90%);
+          box-shadow: 0 0 60px 25px rgba(255, 245, 200, 0.4);
+          animation: moonPulse 8s ease-in-out infinite alternate;
           z-index: 1;
         }
 
-        @keyframes moonFloat {
-          from { transform: translateY(0px); opacity: 0.9; }
-          to { transform: translateY(20px); opacity: 1; }
+        @keyframes moonPulse {
+          from { transform: translateY(0px) scale(1); opacity: 0.9; }
+          to { transform: translateY(15px) scale(1.03); opacity: 1; }
         }
 
         .star {
@@ -232,35 +231,38 @@ export default function Home() {
         .card {
           max-width: 700px;
           background: rgba(255,255,255,0.05);
-          padding: 24px;
-          border-radius: 20px;
+          padding: 26px;
+          border-radius: 22px;
           backdrop-filter: blur(10px);
-          box-shadow: 0 0 40px rgba(255,255,255,0.1);
+          box-shadow: 0 0 50px rgba(255,255,255,0.08);
+          transition: all 1s ease;
         }
 
         .title {
-          font-size: 1.6rem;
+          font-size: 1.8rem;
           font-weight: 600;
           color: #ffd6ff;
-          text-shadow: 0 0 15px #ff7ce5;
+          text-shadow: 0 0 20px #ff7ce5;
+          margin-bottom: 12px;
         }
 
         .line {
           font-size: 1.25rem;
-          transition: all 1s ease;
+          transition: all 1.2s ease;
           opacity: 0;
-          margin-top: 18px;
-          line-height: 1.5;
+          margin-top: 10px;
+          line-height: 1.6;
+          transform: translateY(20px);
         }
 
         .line.visible {
           opacity: 1;
-          transform: scale(1);
+          transform: translateY(0);
         }
 
         .line.hidden {
           opacity: 0;
-          transform: scale(0.98);
+          transform: translateY(-20px);
         }
 
         .signature {
@@ -272,4 +274,4 @@ export default function Home() {
       `}</style>
     </div>
   );
-            }
+}
