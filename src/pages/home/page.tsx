@@ -1,151 +1,239 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const romanticLines = [
-  "My Queen 🥺🌹",
-  "I know I’ve messed up...",
-  "I’m truly sorry for the pain I caused you 💔",
-  "You didn’t deserve any of it, my love",
-  "You deserve peace, happiness, and someone who never hurts you",
-  "And I promise, I’m working every day to be that man for you 🙏",
-  "All I ever wanted was to make you smile",
-  "You mean too much to me to ever lose 💔",
-  "But please hear this from my heart...",
-  "You are the most beautiful soul I’ve ever known ✨",
-  "My omalicha, my lovebug, my cute little coconut head girl 💞",
-  "Even from miles away, your energy pulls me in",
-  "Your smile could light up my whole world",
-  "Your laugh? It’s my favorite sound ever 🎵",
-  "You make my heart race even through a screen",
-  "And your stubbornness… oh, it just makes you more adorable 😅",
-  "You’ve got this magic that keeps me thinking of you all day",
-  "I dream of the moment I finally hold you close",
-  "To look into your eyes and say, ‘You’re my everything’ 💫",
-  "lovebug🌚",
-  "You know how crazy you make me, right?",
-  "The way you talk, the way you tease me… you’re too good at this 😌",
-  "You’ve got me wrapped around your little finger, coconut head 💕",
-  "Every time you call me ‘babe,’ my whole mood changes",
-  "And that cute attitude of yours? It’s dangerous, loml 🌝",
-  "You make me weak and addicted at the same time",
-  "Stop making me fall harder every day — it’s not fair 😅",
-  "I swear, you’ve got me smiling like a fool every time we talk",
-  "..but always try to let go of the past, so it won't affect the present and our future🥺🌹",
-  "But let’s be real for a second…",
-  "If your lips were near mine right now 🫦",
-  "I’d forget every word I just said",
-  "I’d pull you close, whisper your name, and let you feel every heartbeat",
-  "I’d kiss you until you forget what distance even means 💋",
-  "Your voice, your laugh, your everything — it drives me insane",
-  "You’re intoxicating, mesmerizing, irresistible",
-  "I want to make you blush till you hide your face in your hands 😘",
-  "I want to be the reason you smile before bed and wake up grinning in the morning ☀️🌙",
-  "You’re not just my queen… you’re my craving, my weakness, my desire 🔥",
-  "And I’m completely, hopelessly, madly yours — forever and always 🌹✨",
-  "I love you babe🥺🌹"
+/**
+ * For Kofoworola 🌹 & Oyindamola 🤍✨️
+ * From King Lowkey ⚡️
+ *
+ * Music is generated in-browser (WebAudio) so no external file required.
+ * Autoplay tries to start immediately, and also starts on first tap for mobile.
+ */
+
+/* --- long affectionate + playful lines --- */
+const LINES = [
+  "Hey you two… 🌙",
+  "Kofoworola 🌹 & Oyindamola 🤍✨️",
+  "My favorite duo since laughter became a language 😄",
+  "You both bring energy, light, and a kind of peace I can’t explain 💫",
+  "Kofoworola, your warmth feels like sunshine on a tired day ☀️",
+  "Oyindamola, your calm chaos is quietly powerful 🤍",
+  "Together you’re unstoppable — like stars that refuse to fade ✨",
+  "You turn ordinary moments into something golden 💛",
+  "Even silence with you feels like a cozy song 🎶",
+  "I’m grateful for every laugh, every random midnight plan, every honest chat ❤️",
+  "Distance? Nah — this bond doesn’t know how to be small 💫",
+  "So here’s a tiny corner of the night — made just for you 🌌",
+  "Let the stars glow for your friendship ✨",
+  "May your hearts always find reasons to smile ❤️",
+  "You’re both rare — together, legendary 🫶",
+  "With all love and respect,",
+  "— King Lowkey ⚡️"
 ];
 
-export default function HomePage() {
-  const [currentLine, setCurrentLine] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const audioRef = useRef<HTMLAudioElement>(null);
+/* Utility: create n DOM stars (random positions + sizes) */
+function createStars(n: number) {
+  const stars = [];
+  for (let i = 0; i < n; i++) {
+    const size = Math.random() * 2.6 + 0.6;
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const delay = Math.random() * 3;
+    const duration = 2 + Math.random() * 3;
+    stars.push({ id: i, size, left, top, delay, duration });
+  }
+  return stars;
+}
 
-  // audio autoplay
+/* Utility: floating hearts */
+function createHearts(n: number) {
+  const hearts = [];
+  for (let i = 0; i < n; i++) {
+    const left = Math.random() * 100;
+    const top = 60 + Math.random() * 40;
+    const delay = Math.random() * 3;
+    const duration = 6 + Math.random() * 6;
+    const scale = 0.9 + Math.random() * 0.9;
+    hearts.push({ id: i, left, top, delay, duration, scale });
+  }
+  return hearts;
+}
+
+/* In-browser ambient generator (basic pad + gentle pulses) */
+function useAmbientAudio() {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const masterRef = useRef<GainNode | null>(null);
+  const runningRef = useRef(false);
+
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = 0.4;
-    const attemptPlay = () => {
-      audio.play().catch(() => {});
+    return () => {
+      if (ctxRef.current) {
+        try { ctxRef.current.close(); } catch {}
+      }
     };
-    attemptPlay();
-    document.addEventListener("click", attemptPlay, { once: true });
-    document.addEventListener("touchstart", attemptPlay, { once: true });
   }, []);
 
-  // text transition
+  const start = async () => {
+    if (runningRef.current) return;
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AudioContextClass();
+    ctxRef.current = ctx;
+
+    // master
+    const master = ctx.createGain();
+    master.gain.value = 0.0001; // start near silence for gentle fade-in
+    master.connect(ctx.destination);
+    masterRef.current = master;
+
+    // slow pad: two detuned oscillators through lowpass
+    const o1 = ctx.createOscillator();
+    const o2 = ctx.createOscillator();
+    o1.type = "sine"; o2.type = "sine";
+    o1.frequency.value = 110; // A2-ish
+    o2.frequency.value = 110 * 1.01; // slight detune
+    const padGain = ctx.createGain(); padGain.gain.value = 0.2;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 800;
+    o1.connect(padGain); o2.connect(padGain); padGain.connect(lp); lp.connect(master);
+    o1.start(); o2.start();
+
+    // slow LFO to gently modulate pad gain (breathing)
+    const lfo = ctx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 0.07;
+    const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.15;
+    lfo.connect(lfoGain);
+    lfoGain.connect(padGain.gain);
+    lfo.start();
+
+    // soft rhythmic pulse with noise burst
+    const pulse = ctx.createOscillator(); pulse.type = "sine"; pulse.frequency.value = 2.0;
+    const pulseGain = ctx.createGain(); pulseGain.gain.value = 0.0;
+    pulse.connect(pulseGain); pulseGain.connect(master);
+    pulse.start();
+
+    // schedule gentle pulse increases
+    let t = ctx.currentTime;
+    const schedulePulse = () => {
+      const now = ctx.currentTime;
+      pulseGain.gain.cancelScheduledValues(now);
+      pulseGain.gain.setValueAtTime(0, now);
+      pulseGain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+      pulseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+      setTimeout(schedulePulse, 1200 + Math.random() * 400);
+    };
+    schedulePulse();
+
+    // tiny stereo width via delay
+    const delay = ctx.createDelay(2.0); delay.delayTime.value = 0.18;
+    const feedback = ctx.createGain(); feedback.gain.value = 0.18;
+    master.connect(delay); delay.connect(feedback); feedback.connect(master);
+
+    // gentle fade in
+    master.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 2.5);
+
+    // mark running
+    runningRef.current = true;
+    // store refs so stop could be implemented
+  };
+
+  return { start };
+}
+
+export default function Home() {
+  const stars = createStars(60);
+  const hearts = createHearts(10);
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const ambient = useAmbientAudio();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // attempt to start ambient immediately (autoplay), fallback to user interaction
   useEffect(() => {
-    const showTime = 3000;
-    const hideTime = 1000;
-    const showTimer = setTimeout(() => setVisible(false), showTime);
-    const nextTimer = setTimeout(() => {
-      setCurrentLine((i) => (i + 1) % romanticLines.length);
-      setVisible(true);
-    }, showTime + hideTime);
+    const tryStart = async () => {
+      try {
+        await ambient.start();
+      } catch {
+        // ignore, will start on user interaction
+      }
+    };
+    tryStart();
+
+    const onFirst = async () => {
+      try { await ambient.start(); } catch {}
+      // remove handlers after first interaction
+      document.removeEventListener("click", onFirst);
+      document.removeEventListener("touchstart", onFirst);
+    };
+    document.addEventListener("click", onFirst, { once: true });
+    document.addEventListener("touchstart", onFirst, { once: true });
+
     return () => {
-      clearTimeout(showTimer);
+      document.removeEventListener("click", onFirst);
+      document.removeEventListener("touchstart", onFirst);
+    };
+  }, []);
+
+  // line rotation + visibility
+  useEffect(() => {
+    const showDuration = index === 0 ? 3200 : 4200;
+    const hideAfter = setTimeout(() => setVisible(false), showDuration);
+    const nextTimer = setTimeout(() => {
+      setIndex((i) => Math.min(i + 1, LINES.length - 1));
+      setVisible(true);
+    }, showDuration + 900);
+    return () => {
+      clearTimeout(hideAfter);
       clearTimeout(nextTimer);
     };
-  }, [currentLine]);
+  }, [index]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-[#0a0015] via-[#1a0a2e] to-[#0f0520]">
-      {/* stars */}
-      <div className="absolute inset-0 z-0 pointer-none">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
-            style={{
-              width: Math.random() * 3 + 1 + "px",
-              height: Math.random() * 3 + 1 + "px",
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: 0.5 + Math.random() * 0.5,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* floating roses */}
-      <div className="absolute inset-0 z-5 pointer-none">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-4xl text-pink-300 opacity-70 animate-bounce"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              filter: "drop-shadow(0 0 10px pink)",
-              animationDelay: `${Math.random() * 3}s`,
-            }}
-          >
-            🌹
-          </div>
-        ))}
-      </div>
-
-      {/* romantic line */}
-      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-none">
-        <h1
-          className={`text-center px-6 text-4xl md:text-6xl font-bold bg-clip-text text-transparent transition-all duration-1000 ${
-            visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-          }`}
+    <div className="app" ref={containerRef}>
+      {/* dynamic DOM stars */}
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="star"
           style={{
-            backgroundImage:
-              "linear-gradient(to right, #fff, #ffc0cb, #ff69b4)",
-            textShadow:
-              "0 0 40px rgba(255,182,193,0.8), 0 0 80px rgba(255,105,180,0.6)",
-            fontFamily: "'Pacifico', cursive",
-            lineHeight: 1.1,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            left: `${s.left}%`,
+            top: `${s.top}%`,
+            animationDelay: `${s.delay}s`,
+            animationDuration: `${s.duration}s`,
+            zIndex: 1
+          }}
+        />
+      ))}
+
+      {/* floating hearts */}
+      {hearts.map((h) => (
+        <div
+          key={h.id}
+          className="heart"
+          style={{
+            left: `${h.left}%`,
+            top: `${h.top}%`,
+            animationDelay: `${h.delay}s`,
+            animationDuration: `${h.duration}s`,
+            transform: `scale(${h.scale})`,
+            zIndex: 6
           }}
         >
-          {romanticLines[currentLine]}
-        </h1>
-      </div>
+          ❤️
+        </div>
+      ))}
 
-      {/* footer */}
-      <div className="absolute bottom-8 w-full text-center z-20 pointer-none">
-        <p style={{ fontFamily: "'Pacifico', cursive", fontSize: "1.2rem", color: "rgba(255,255,255,0.9)" }}>
-          — With heart ❤️ From Ayomide 🌹💫
-        </p>
-      </div>
+      {/* central content card */}
+      <div className="center">
+        <div className="card" role="main" aria-live="polite">
+          <h1 className="title">Kofoworola 🌹 &amp; Oyindamola 🤍✨️</h1>
 
-      {/* music */}
-      <audio ref={audioRef} loop preload="auto">
-        <source src="/her-majesty.mp3" type="audio/mpeg" />
-      </audio>
+          <div style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 8px" }}>
+            <p className={`line ${visible ? "visible" : "hidden"}`} style={{ fontSize: 18, margin: 0 }}>
+              {LINES[index]}
+            </p>
+          </div>
+
+          <div className="signature">— King Lowkey ⚡️</div>
+        </div>
+      </div>
     </div>
   );
-            }
+}
