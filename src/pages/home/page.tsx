@@ -1,239 +1,176 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-/**
- * For Kofoworola 🌹 & Oyindamola 🤍✨️
- * From King Lowkey ⚡️
- *
- * Music is generated in-browser (WebAudio) so no external file required.
- * Autoplay tries to start immediately, and also starts on first tap for mobile.
- */
-
-/* --- long affectionate + playful lines --- */
-const LINES = [
-  "Hey you two… 🌙",
-  "Kofoworola 🌹 & Oyindamola 🤍✨️",
-  "My favorite duo since laughter became a language 😄",
-  "You both bring energy, light, and a kind of peace I can’t explain 💫",
-  "Kofoworola, your warmth feels like sunshine on a tired day ☀️",
-  "Oyindamola, your calm chaos is quietly powerful 🤍",
-  "Together you’re unstoppable — like stars that refuse to fade ✨",
-  "You turn ordinary moments into something golden 💛",
-  "Even silence with you feels like a cozy song 🎶",
-  "I’m grateful for every laugh, every random midnight plan, every honest chat ❤️",
-  "Distance? Nah — this bond doesn’t know how to be small 💫",
-  "So here’s a tiny corner of the night — made just for you 🌌",
-  "Let the stars glow for your friendship ✨",
-  "May your hearts always find reasons to smile ❤️",
-  "You’re both rare — together, legendary 🫶",
-  "With all love and respect,",
-  "— King Lowkey ⚡️"
+const romanticLines = [
+  "To Kofoworola 🌹 & Oyindamola 🤍✨️",
+  "Two souls who make the night feel softer...",
+  "You both bring light even to the darkest skies 💫",
+  "Your laughter — it’s a melody I never want to forget 🎵",
+  "Your kindness and warmth inspire everything around you",
+  "The way you both glow… it’s impossible not to notice 🌌",
+  "Some people just have that magic — and you’re both made of it ✨",
+  "If the stars could talk, they’d speak your names",
+  "Thank you for being my peace, my joy, my friends 🫶",
+  "The world’s a lot more beautiful with you two in it 🌹🤍",
+  "Never stop shining, never stop smiling",
+  "And if you ever forget how special you are —",
+  "Look at the stars… they’ll remind you 🌠",
+  "You’re loved more than you know 💞",
+  "Always — King Lowkey ⚡️🌹"
 ];
 
-/* Utility: create n DOM stars (random positions + sizes) */
-function createStars(n: number) {
-  const stars = [];
-  for (let i = 0; i < n; i++) {
-    const size = Math.random() * 2.6 + 0.6;
-    const left = Math.random() * 100;
-    const top = Math.random() * 100;
-    const delay = Math.random() * 3;
-    const duration = 2 + Math.random() * 3;
-    stars.push({ id: i, size, left, top, delay, duration });
-  }
-  return stars;
-}
-
-/* Utility: floating hearts */
-function createHearts(n: number) {
-  const hearts = [];
-  for (let i = 0; i < n; i++) {
-    const left = Math.random() * 100;
-    const top = 60 + Math.random() * 40;
-    const delay = Math.random() * 3;
-    const duration = 6 + Math.random() * 6;
-    const scale = 0.9 + Math.random() * 0.9;
-    hearts.push({ id: i, left, top, delay, duration, scale });
-  }
-  return hearts;
-}
-
-/* In-browser ambient generator (basic pad + gentle pulses) */
-function useAmbientAudio() {
-  const ctxRef = useRef<AudioContext | null>(null);
-  const masterRef = useRef<GainNode | null>(null);
-  const runningRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      if (ctxRef.current) {
-        try { ctxRef.current.close(); } catch {}
-      }
-    };
-  }, []);
-
-  const start = async () => {
-    if (runningRef.current) return;
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioContextClass();
-    ctxRef.current = ctx;
-
-    // master
-    const master = ctx.createGain();
-    master.gain.value = 0.0001; // start near silence for gentle fade-in
-    master.connect(ctx.destination);
-    masterRef.current = master;
-
-    // slow pad: two detuned oscillators through lowpass
-    const o1 = ctx.createOscillator();
-    const o2 = ctx.createOscillator();
-    o1.type = "sine"; o2.type = "sine";
-    o1.frequency.value = 110; // A2-ish
-    o2.frequency.value = 110 * 1.01; // slight detune
-    const padGain = ctx.createGain(); padGain.gain.value = 0.2;
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 800;
-    o1.connect(padGain); o2.connect(padGain); padGain.connect(lp); lp.connect(master);
-    o1.start(); o2.start();
-
-    // slow LFO to gently modulate pad gain (breathing)
-    const lfo = ctx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 0.07;
-    const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.15;
-    lfo.connect(lfoGain);
-    lfoGain.connect(padGain.gain);
-    lfo.start();
-
-    // soft rhythmic pulse with noise burst
-    const pulse = ctx.createOscillator(); pulse.type = "sine"; pulse.frequency.value = 2.0;
-    const pulseGain = ctx.createGain(); pulseGain.gain.value = 0.0;
-    pulse.connect(pulseGain); pulseGain.connect(master);
-    pulse.start();
-
-    // schedule gentle pulse increases
-    let t = ctx.currentTime;
-    const schedulePulse = () => {
-      const now = ctx.currentTime;
-      pulseGain.gain.cancelScheduledValues(now);
-      pulseGain.gain.setValueAtTime(0, now);
-      pulseGain.gain.linearRampToValueAtTime(0.14, now + 0.02);
-      pulseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
-      setTimeout(schedulePulse, 1200 + Math.random() * 400);
-    };
-    schedulePulse();
-
-    // tiny stereo width via delay
-    const delay = ctx.createDelay(2.0); delay.delayTime.value = 0.18;
-    const feedback = ctx.createGain(); feedback.gain.value = 0.18;
-    master.connect(delay); delay.connect(feedback); feedback.connect(master);
-
-    // gentle fade in
-    master.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 2.5);
-
-    // mark running
-    runningRef.current = true;
-    // store refs so stop could be implemented
-  };
-
-  return { start };
-}
-
 export default function Home() {
-  const stars = createStars(60);
-  const hearts = createHearts(10);
-  const [index, setIndex] = useState(0);
+  const [currentLine, setCurrentLine] = useState(0);
   const [visible, setVisible] = useState(true);
-  const ambient = useAmbientAudio();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // attempt to start ambient immediately (autoplay), fallback to user interaction
+  // 🔊 Auto play (safe for mobile)
   useEffect(() => {
-    const tryStart = async () => {
-      try {
-        await ambient.start();
-      } catch {
-        // ignore, will start on user interaction
-      }
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.5;
+    const playAudio = () => {
+      audio.play().catch(() => {});
+      document.removeEventListener("click", playAudio);
+      document.removeEventListener("touchstart", playAudio);
     };
-    tryStart();
-
-    const onFirst = async () => {
-      try { await ambient.start(); } catch {}
-      // remove handlers after first interaction
-      document.removeEventListener("click", onFirst);
-      document.removeEventListener("touchstart", onFirst);
-    };
-    document.addEventListener("click", onFirst, { once: true });
-    document.addEventListener("touchstart", onFirst, { once: true });
-
-    return () => {
-      document.removeEventListener("click", onFirst);
-      document.removeEventListener("touchstart", onFirst);
-    };
+    document.addEventListener("click", playAudio);
+    document.addEventListener("touchstart", playAudio);
+    audio.play().catch(() => {});
   }, []);
 
-  // line rotation + visibility
+  // ⏳ Text transitions
   useEffect(() => {
-    const showDuration = index === 0 ? 3200 : 4200;
-    const hideAfter = setTimeout(() => setVisible(false), showDuration);
+    const showDuration = 7000;
+    const hideDuration = 1000;
+    const showTimer = setTimeout(() => setVisible(false), showDuration);
     const nextTimer = setTimeout(() => {
-      setIndex((i) => Math.min(i + 1, LINES.length - 1));
-      setVisible(true);
-    }, showDuration + 900);
+      if (currentLine < romanticLines.length - 1) {
+        setCurrentLine((c) => c + 1);
+        setVisible(true);
+      }
+    }, showDuration + hideDuration);
     return () => {
-      clearTimeout(hideAfter);
+      clearTimeout(showTimer);
       clearTimeout(nextTimer);
     };
-  }, [index]);
+  }, [currentLine]);
 
   return (
-    <div className="app" ref={containerRef}>
-      {/* dynamic DOM stars */}
-      {stars.map((s) => (
-        <div
-          key={s.id}
-          className="star"
-          style={{
-            width: `${s.size}px`,
-            height: `${s.size}px`,
-            left: `${s.left}%`,
-            top: `${s.top}%`,
-            animationDelay: `${s.delay}s`,
-            animationDuration: `${s.duration}s`,
-            zIndex: 1
-          }}
-        />
-      ))}
+    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-[#070011] via-[#120625] to-[#000010]">
+      {/* 🌙 Glowing moon */}
+      <div className="absolute top-10 right-16 z-10">
+        <div className="w-28 h-28 bg-gradient-to-br from-yellow-100 to-yellow-400 rounded-full shadow-[0_0_60px_20px_rgba(255,255,150,0.4)] animate-moon" />
+      </div>
 
-      {/* floating hearts */}
-      {hearts.map((h) => (
-        <div
-          key={h.id}
-          className="heart"
-          style={{
-            left: `${h.left}%`,
-            top: `${h.top}%`,
-            animationDelay: `${h.delay}s`,
-            animationDuration: `${h.duration}s`,
-            transform: `scale(${h.scale})`,
-            zIndex: 6
-          }}
-        >
-          ❤️
-        </div>
-      ))}
+      {/* 🌟 Background stars */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full opacity-70 animate-pulse"
+            style={{
+              width: `${Math.random() * 3}px`,
+              height: `${Math.random() * 3}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}
+          />
+        ))}
+      </div>
 
-      {/* central content card */}
-      <div className="center">
-        <div className="card" role="main" aria-live="polite">
-          <h1 className="title">Kofoworola 🌹 &amp; Oyindamola 🤍✨️</h1>
-
-          <div style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 8px" }}>
-            <p className={`line ${visible ? "visible" : "hidden"}`} style={{ fontSize: 18, margin: 0 }}>
-              {LINES[index]}
-            </p>
+      {/* ❤️ Floating hearts */}
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-pink-300 text-lg animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: `-${Math.random() * 20}px`,
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${6 + Math.random() * 6}s`
+            }}
+          >
+            ❤️
           </div>
+        ))}
+      </div>
 
-          <div className="signature">— King Lowkey ⚡️</div>
+      {/* ✨ Shimmer overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-transparent animate-shimmer z-10" />
+
+      {/* 💬 Main text */}
+      <div className="relative z-20 flex items-center justify-center w-full h-full px-8">
+        <div className="w-full max-w-4xl text-center">
+          <h1
+            className={`transition-all duration-1000 transform ${
+              visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            } text-4xl md:text-6xl font-bold bg-gradient-to-r from-rose-300 via-pink-200 to-white bg-clip-text text-transparent animate-softfloat`}
+            style={{
+              fontFamily: "'Pacifico', cursive",
+              textShadow:
+                "0 0 40px rgba(255, 182, 193, 0.8), 0 0 80px rgba(255, 105, 180, 0.6)",
+              lineHeight: "1.4"
+            }}
+          >
+            {romanticLines[currentLine]}
+          </h1>
         </div>
       </div>
+
+      {/* 🖋 Signature */}
+      <div className="absolute bottom-8 left-0 right-0 z-30 text-center">
+        <p
+          className="text-2xl text-white/90 drop-shadow-lg"
+          style={{
+            fontFamily: "'Pacifico', cursive",
+            textShadow: "0 0 20px rgba(255, 182, 193, 0.6)"
+          }}
+        >
+          — With heart ❤️ From King Lowkey ⚡️🌹
+        </p>
+      </div>
+
+      {/* 🎵 Music */}
+      <audio ref={audioRef} src="/her-majesty.mp3" loop></audio>
+
+      {/* 🌸 Font */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+        rel="stylesheet"
+      />
     </div>
   );
 }
+
+/* 🌌 Custom Animations */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-60vh) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
+}
+.animate-float { animation: float linear infinite; }
+
+@keyframes shimmer {
+  0%,100% { opacity: 0.05; }
+  50% { opacity: 0.15; }
+}
+.animate-shimmer { animation: shimmer 3s ease-in-out infinite; }
+
+@keyframes softfloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-6px) scale(1.02); }
+}
+.animate-softfloat { animation: softfloat 4s ease-in-out infinite; }
+
+@keyframes moonmove {
+  0%, 100% { transform: translateY(0px); filter: brightness(1); }
+  50% { transform: translateY(8px); filter: brightness(1.2); }
+}
+.animate-moon { animation: moonmove 6s ease-in-out infinite; }
+`;
+document.head.appendChild(style);
