@@ -107,3 +107,24 @@ html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1
   .card{padding:18px}
   .line{font-size:1rem}
 }
+
+body {
+  background: radial-gradient(ellipse at center, #0d0220, #000814);
+  font-family: 'Inter', sans-serif;
+  color: rgba(255,255,255,0.9);
+  text-align: center;
+  overflow: hidden;
+}
+.title {
+  font-family: 'Pacifico', cursive;
+  background: linear-gradient(90deg, #ff9acc, #fff, #ffd1e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 2.4rem;
+  letter-spacing: 1px;
+}
+.line {
+  text-shadow: 0 0 8px rgba(255,200,240,0.4);
+  transition: all .6s ease;
+}
