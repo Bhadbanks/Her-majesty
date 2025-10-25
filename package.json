@@ -1,5 +1,5 @@
 {
-  "name": "her-majesty",
+  "name": "for-k-and-o",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,18 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "^10.6.1",
-    "@react-three/fiber": "^9.3.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3",
-    "three": "^0.179.1"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.0.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.0.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.3"
+    "vite": "^7.0.0",
+    "typescript": "~5.8.3"
   }
 }
