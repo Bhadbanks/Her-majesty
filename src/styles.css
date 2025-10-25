@@ -18,6 +18,14 @@ html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1
   -moz-osx-font-smoothing:grayscale;
 }
 
+.moon {
+  width: 70px;             /* was 90px */
+  height: 70px;
+  top: 12%;
+  right: 18%;
+  background: radial-gradient(circle, #fff9e6 25%, #f0e0b0 65%, transparent 80%);
+  box-shadow: 0 0 25px 10px rgba(255, 250, 200, 0.5);
+}
 /* stars (DOM) */
 .star {
   position:absolute;
@@ -60,10 +68,10 @@ html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1
 }
 .card {
   width:100%;
-  max-width:980px;
+  max-width:1050px;
   text-align:center;
   pointer-events:auto;
-  padding:28px 22px;
+  padding:36px 28px;
   border-radius:18px;
   backdrop-filter: blur(6px) saturate(1.2);
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
@@ -83,6 +91,13 @@ html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1
   text-shadow:0 6px 30px rgba(255,130,170,0.12);
 }
 
+/* glowing message lines */
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 8px rgba(255, 180, 255, 0.3); }
+  50% { text-shadow: 0 0 16px rgba(255, 200, 255, 0.7); }
+  100% { text-shadow: 0 0 8px rgba(255, 180, 255, 0.3); }
+}
+
 /* message lines */
 .line {
   font-size:1.05rem;
@@ -96,6 +111,7 @@ html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1
 
 /* footer */
 .signature {
+  font-family: 'Great Vibes', cursive;
   margin-top:18px;
   font-size:1rem;
   color:rgba(255,235,235,0.9);
